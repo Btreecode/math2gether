@@ -1,0 +1,72 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+  .darkYellowBody {
+    background-color: rgba(254, 218, 81, 0.7);
+  }
+  .darkGrayBody {
+    background-color: rgb(220, 220, 220);
+  }
+}
+
+.btn {
+  @apply yellowBody yellowBorder hover:darkYellowBody border-4 p-1 grayText rounded px-3;
+}
+
+.yellowBorder {
+  border-color: rgba(254, 218, 81, 1);
+}
+
+.yellowBody {
+  background-color: rgba(254, 218, 81, 0.5);
+}
+
+.grayText {
+  color: rgb(89, 89, 89);
+}
+
+.blueBorder {
+  border-color: rgba(126, 220, 209, 1);
+}
+
+.lightBlueBody {
+  background-color: rgba(126, 220, 209, 0.6);
+}
+
+.blueBody {
+  background-color: rgba(126, 220, 209, 1);
+}
+
+.darkBlueBorder {
+  border-color: rgba(74, 192, 177);
+}
+
+.grayBody {
+  background-color: rgb(238, 238, 238);
+}
+
+.grayBorder {
+  border-color: rgb(204, 204, 204);
+}
+
+.darkGrayBody {
+  background-color: rgb(220, 220, 220);
+}
+
+.redBorder {
+  border-color: rgb(235, 119, 122);
+}
+
+.darkRedBorder {
+  border-color: rgb(183, 91, 90);
+}
+
+.redBody {
+  background-color: rgb(235, 119, 122);
+}
+
+.lightRedBody {
+  background-color: rgba(235, 119, 122, 0.5);
+}
