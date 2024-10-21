@@ -40,6 +40,7 @@ export default function About() {
             firstName={v.firstName}
             lastName={v.lastName}
             grade={v.grade}
+            key={i}
           />
         ))}
       </div>

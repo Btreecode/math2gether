@@ -66,8 +66,10 @@ function Desc({ type }) {
     <div>
       <div className={subtitle}>{type} </div>
       <div className={`p-3 ${subtext}`}>
-        {types[type].map((v) => (
-          <li className="my-1">{v} </li>
+        {types[type].map((v, i) => (
+          <li className="my-1" key={i}>
+            {v}{" "}
+          </li>
         ))}
       </div>
     </div>
