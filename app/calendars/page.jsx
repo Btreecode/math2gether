@@ -3,6 +3,20 @@
 import { useState } from "react";
 import { kodchasan, openSans } from "../../components/font-loader";
 
+let months = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+];
 export default function Calendars() {
   let [d, setD] = useState(new Date());
   let [popup, setPopup] = useState(false);
@@ -117,9 +131,8 @@ export default function Calendars() {
               if (getDay(i + 1) == 6) {
                 ev.stopPropagation();
                 setPopup({
-                  x: ev.pageX,
-                  y: ev.pageY,
                   date: i + 1,
+                  month: d.getMonth(),
                   isCanceled: isCanceled(i + 1),
                 });
               }
@@ -158,42 +171,54 @@ export default function Calendars() {
 }
 
 function Popup({ popup, close, doCancel, doSignup }) {
-  let { x, y, date, isCanceled } = popup;
+  let { date, month, isCanceled } = popup;
   return (
     <div
       className={`p-3 absolute grayText rounded-xl border-4 ${
         kodchasan.className
-      } w-48
-          ${isCanceled ? `lightBlueBody blueBorder` : `lightRedBody redBorder`}
+      } w-72 sm:w-96
+          ${!isCanceled ? `lightBlueBody blueBorder` : `lightRedBody redBorder`}
         `}
       style={{
-        top: y,
-        left: x > window.innerWidth / 2 ? x - 192 : x,
+        top: 150,
+        left: 50,
       }}
       onClick={(event) => {
         event.stopPropagation();
       }}
     >
-      <div className="pb-2"> {date} </div>
-      <div className="flex justify-center">
-        {!isCanceled ? (
-          <button
-            className="darkRedBorder border-4 rounded-xl p-1 px-2 redBody"
-            onClick={doCancel}
-          >
-            {" "}
-            CANCEL
-          </button>
-        ) : (
-          <button
-            className="darkBlueBorder border-4 rounded-xl p-1 px-2 blueBody"
-            onClick={doSignup}
-          >
-            {" "}
-            SIGN UP
-          </button>
-        )}
-      </div>
+      <div className="pb-2"> Class for {months[month] + " " + date} </div>
+      {!isCanceled ? (
+        <div className="">
+          <div className="flex justify-center">
+            You are enrolled for this class.{" "}
+          </div>
+          <div className="flex justify-center">
+            <button
+              className="darkBlueBorder border-4 rounded-xl p-1 px-2 blueBody"
+              onClick={doCancel}
+            >
+              {" "}
+              CANCEL
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div className="">
+          <div className="text-center">
+            You are not enrolled for this class.
+          </div>
+          <div className="flex justify-center">
+            <button
+              className="darkRedBorder border-4 rounded-xl p-1 px-2 redBody"
+              onClick={doSignup}
+            >
+              {" "}
+              SIGN UP
+            </button>
+          </div>
+        </div>
+      )}
       <div>
         <button onClick={close}>x</button>
       </div>

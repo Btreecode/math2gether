@@ -9,6 +9,10 @@
   .darkGrayBody {
     background-color: rgb(220, 220, 220);
   }
+  .disabledBlueBody {
+    background-color: rgb(182, 205, 201);
+    color: #efefef;
+  }
 }
 
 .btn {

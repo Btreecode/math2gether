@@ -42,14 +42,14 @@ export default function LayoutClient({ children }) {
               </button>
             </div>
           ) : (
-            <>
+            <div className="hidden sm:block space-x-2">
               <button className="btn" onClick={doLogin}>
                 Log In
               </button>
               <button className="btn" onClick={doLogin}>
                 Sign Up
               </button>
-            </>
+            </div>
           )}
           <div
             onClick={(event) => {
@@ -84,5 +84,16 @@ function Child({ link, name }) {
     >
       {name}
     </Link>
+  );
+}
+
+function Login({ name, func }) {
+  return (
+    <div
+      className="border border-2 grayBorder p-2 w-32 hover:darkGrayBody"
+      onClick={func}
+    >
+      {name}
+    </div>
   );
 }

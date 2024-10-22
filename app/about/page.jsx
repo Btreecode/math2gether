@@ -5,7 +5,7 @@ let body = "flex justify-center text-sm";
 let shape = "w-full rounded-md yellowBody p-3";
 
 export default function About() {
-  let Jdes = "hlelo im ur fav jenny ahahhahaha";
+  let Jdes = "hlelo im ur fav jenny heheheh";
   let Cdes = "";
   let Sdes = "";
   let volunteers = [
