@@ -1,18 +1,37 @@
 "use client";
 
 import { useState } from "react";
-import { openSans } from "../../components/font-loader";
+import { kodchasan, openSans } from "../../components/font-loader";
 
+let months = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+];
 export default function Calendart() {
   let [d, setD] = useState(new Date());
   let [popup, setPopup] = useState(false);
+  let [canceledDates, setCD] = useState([
+    "2024-10-12",
+    "2024-10-19",
+    "2024-11-2",
+  ]);
+
   let now = new Date();
   function onchange(a) {
     let temp = new Date(d);
     temp.setMonth(d.getMonth() + a);
     setD(temp);
   }
-  let day = now.getDay();
 
   function getDaysInMnth(d) {
     let dd = new Date(d);
@@ -21,8 +40,42 @@ export default function Calendart() {
     return dd.getDate();
   }
 
+  function getDay(date) {
+    let copy = new Date(d);
+    copy.setDate(date);
+    return copy.getDay();
+  }
+
+  function isCanceled(i) {
+    return canceledDates.includes(
+      d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + i
+    );
+  }
+
+  function doSignup() {
+    let dStr = d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + popup.date;
+    setCD(canceledDates.filter((v) => v !== dStr));
+
+    // let popupCopy = { ...popup };
+    // popupCopy.isCanceled = false;
+    // setPopup(popupCopy);
+    alert("Thank you for your response! See you during class!");
+    setPopup(undefined);
+  }
+
+  function doCancel() {
+    let dStr = d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + popup.date;
+    setCD([...canceledDates, dStr]);
+
+    // let popupCopy = { ...popup };
+    // popupCopy.isCanceled = true;
+    // setPopup(popupCopy);
+    alert("Thank you for your response! You will be marked as absent.");
+    setPopup(undefined);
+  }
+
   return (
-    <div className={openSans.className}>
+    <div className={openSans.className} onClick={() => setPopup(false)}>
       <div className="flex">
         <button
           onClick={() => setD(now)}
@@ -72,49 +125,120 @@ export default function Calendart() {
           <Cell />
         )}
         {new Array(getDaysInMnth(d)).fill(0).map((a, i) => (
-          <button
+          <div
             key={i}
-            className="text-right border border-l-0 border-b-0 p-2 h-28 flex justify-end"
+            className={`
+              border border-l-0 border-b-0 p-2 h-28 flex flex-col items-stretch select-none hover:bg-gray-100
+              ${getDay(i + 1) == 6 ? "cursor-pointer " : ""}
+            `}
             onClick={(ev) => {
-              console.log(ev);
-              setPopup({
-                x: ev.pageX,
-                y: ev.pageY,
-              });
+              if (getDay(i + 1) == 6) {
+                ev.stopPropagation();
+                setPopup({
+                  date: i + 1,
+                  month: d.getMonth(),
+                  isCanceled: isCanceled(i + 1),
+                });
+              }
             }}
           >
-            {i + 1} {i + 1 == 12 ? "" : ""}
-          </button>
+            <div className="flex justify-end">{i + 1}</div>
+            <div>{getDay(i + 1) == 6 ? <Class /> : ""}</div>
+            <div>
+              {getDay(i + 1) == 6 && isCanceled(i + 1) ? "canceled" : ""}
+            </div>
+          </div>
         ))}
-        {new Array(
-          7 -
-            ((new Date(d.getFullYear(), d.getMonth()).getDay() +
-              getDaysInMnth(new Date(d.getFullYear(), d.getMonth()))) %
-              7)
-        ).fill(<Cell />)}
+        {7 -
+          ((new Date(d.getFullYear(), d.getMonth()).getDay() +
+            getDaysInMnth(new Date(d.getFullYear(), d.getMonth()))) %
+            7) ==
+        7
+          ? ""
+          : new Array(
+              7 -
+                ((new Date(d.getFullYear(), d.getMonth()).getDay() +
+                  getDaysInMnth(new Date(d.getFullYear(), d.getMonth()))) %
+                  7)
+            ).fill(<Cell />)}
       </div>
       {popup ? (
-        <Popup popup={popup} close={() => setPopup(false)} />
+        <Popup
+          popup={popup}
+          close={() => setPopup(false)}
+          doCancel={doCancel}
+          doSignup={doSignup}
+        />
       ) : undefined}
     </div>
   );
 }
 
-function Popup({ popup, close }) {
-  let { x, y } = popup;
+function Popup({ popup, close, doCancel, doSignup }) {
+  let { date, month, isCanceled } = popup;
+  let [text, setText] = useState("");
   return (
     <div
-      className="bg-gray-300 p-3 absolute"
+      className={`p-5 absolute grayText rounded-xl border-4 select-none ${
+        kodchasan.className
+      } w-72 sm:w-96
+          ${!isCanceled ? `lightBlueBody blueBorder` : `lightRedBody redBorder`}
+        `}
       style={{
-        background: "rgba(0,0,0, 0.5)",
-        top: y,
-        left: x,
+        top: 150,
+        left: 50,
+      }}
+      onClick={(event) => {
+        event.stopPropagation();
       }}
     >
-      popup for {x}, {y}
-      <div>
+      <div className="absolute top-2 right-3">
         <button onClick={close}>x</button>
       </div>
+      <div className="pb-2 text-lg text-bold">
+        {" "}
+        Class for {months[month] + " " + date}{" "}
+      </div>
+      {!isCanceled ? (
+        <div className="">
+          <div className="flex justify-center">
+            You are teaching on this date.{" "}
+          </div>
+          <div className="py-2">
+            If you are unable to attend, please explain below:
+          </div>
+          <textarea
+            onChange={(ev) => setText(ev.target.value)}
+            value={text}
+            rows={5}
+            className="border-2 w-64 sm:w-80 rounded-lg resize-none p-2"
+            placeholder="Reason for absence.."
+          />
+          <div className="flex justify-center">
+            <button
+              className="darkBlueBorder border-4 rounded-xl p-1 px-2 m-3 blueBody disabled:disabledBlueBody "
+              onClick={doCancel}
+              disabled={text.length === 0}
+            >
+              {" "}
+              SUBMIT
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div className="">
+          <div className="text-center">You are not teaching on this date.</div>
+          <div className="flex justify-center">
+            <button
+              className="darkRedBorder border-4 rounded-xl p-1 px-2 m-3 redBody"
+              onClick={doSignup}
+            >
+              {" "}
+              AVAILABLE
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -122,5 +246,18 @@ function Popup({ popup, close }) {
 function Cell() {
   return (
     <div className="text-right border border-l-0 border-b-0 p-2 h-28 flex justify-end"></div>
+  );
+}
+
+function Class() {
+  return (
+    <div>
+      <div />
+      <img
+        className="h-12"
+        src="https://i.imgur.com/qBZge9r.png"
+        style={{ filter: "sephia(100%)" }}
+      />
+    </div>
   );
 }
