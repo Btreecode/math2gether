@@ -187,6 +187,9 @@ function Popup({ popup, close, doCancel, doSignup }) {
         event.stopPropagation();
       }}
     >
+      <div className="absolute top-2 right-3">
+        <button onClick={close}>x</button>
+      </div>
       <div className="pb-2"> Class for {months[month] + " " + date} </div>
       {!isCanceled ? (
         <div className="">
@@ -219,9 +222,6 @@ function Popup({ popup, close, doCancel, doSignup }) {
           </div>
         </div>
       )}
-      <div>
-        <button onClick={close}>x</button>
-      </div>
     </div>
   );
 }
