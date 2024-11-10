@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { kodchasan, openSans } from "../components/font-loader";
+import { Carousel } from "react-responsive-carousel";
+import "react-responsive-carousel/lib/styles/carousel.min.css";
 
 export default function Home() {
   return (
@@ -19,9 +21,8 @@ function Top() {
 
   return (
     <div className={`grid grid-cols-7 mt-5 ${openSans.className}`}>
-      <div className="col-span-7 h-52 sm:h-auto sm:col-span-3 bg-black">
-        {" "}
-        hello
+      <div className="col-span-7 h-52 sm:h-auto sm:col-span-3">
+      <MyCarousel/>
       </div>
       <div className="blueBody col-span-7 sm:col-span-4 p-5 md:p-7 grayText sm:py-7 md:py-10 lg:p-10 lg:py-14 text-base lg:text-xl xl:text-2xl">
         {" "}
@@ -73,5 +74,22 @@ function Desc({ type }) {
         ))}
       </div>
     </div>
+  );
+}
+
+function MyCarousel() {
+
+  return (
+    <Carousel showThumbs={false} dynamicHeight={false} className = "h-full">
+      <div>
+        <img src="https://i.imgur.com/qO45ijy.jpeg" />
+      </div>
+      <div>
+        <img src="https://i.imgur.com/emkHVg2.jpeg" />
+      </div>
+      <div>
+        <img src="https://i.imgur.com/BTciVhM.jpeg" />
+      </div>
+    </Carousel>
   );
 }
