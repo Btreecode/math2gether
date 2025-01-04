@@ -61,7 +61,7 @@ export default function LayoutClient({ children }) {
             <GiHamburgerMenu />
           </div>
           {showPopup ? (
-            <div className="absolute border-2 grayBorder right-3 top-14 grayBody flex flex-col items-center text-center rounded-md select-none">
+            <div className="absolute border-2 grayBorder right-3 top-14 grayBody flex flex-col items-center text-center rounded-md select-none z-40">
               <Child link="/" name="Home" />
               <Child link="/about" name="About Us" />
               <Child link="/calendars" name="Calendar-student" />
