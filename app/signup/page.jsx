@@ -8,21 +8,19 @@ export default function SignUp() {
       className={`${kodchasan.className} grayText flex flex-col items-center`}
     >
       <div className=" text-2xl grayText m-5">STUDENT SIGN UP</div>
-      <div>
-        <div className="mx-5 text-lg">First Name: </div>
-        <input
-          className="border text-lg px-2 mx-5 mb-2 pt-1 w-96"
-          placeHolder="ex. John"
-        />
-      </div>
-      <div className="mx-5 text-lg">Preferred Name(Optional): </div>
+      <div className="mx-5 text-sm">First Name: </div>
       <input
-        className="border text-lg px-2 mx-5 mb-2 pt-1 w-60"
-        placeHolder="ex. Johnny Boy"
+        className="border text-sm px-2 mx-5 mb-2 w-60"
+        placeHolder="ex. John"
       />
-      <div className="mx-5 text-base">Last Name: </div>
+      <div className="mx-5 text-sm">Preferred Name(Optional): </div>
       <input
-        className="border text-base px-2 mx-5 mb-2 pt-1 w-60"
+        className="border text-sm px-2 mx-5 mb-2 w-60"
+        placeHolder="ex. Johnny"
+      />
+      <div className="mx-5 text-sm">Last Name: </div>
+      <input
+        className="border text-sm px-2 mx-5 mb-2 w-60"
         placeHolder="ex. Doe"
       />
       <div className="mx-5 text-sm">Date of Birth(mm/dd/yyyy): </div>

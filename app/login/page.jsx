@@ -1,11 +1,7 @@
-import { kodchasan } from "../../components/font-loader";
 import Link from "next/link";
+import { kodchasan } from "../../components/font-loader";
 
-export default function LogIn() {
-  return <div>login</div>;
-}
-
-function LogInOld() {
+export default function Idk() {
   let text = "h-52 rounded-2xl flex justify-center items-end p-5";
   return (
     <div>
@@ -18,6 +14,13 @@ function LogInOld() {
       >
         <Link className={`blueBody ${text}`} href="/logins">
           STUDENT
+        </Link>
+        <Link
+          className={`yellowBody ${text} flex flex-col items-center justify-center`}
+          href="/loginp"
+        >
+          <img src="https://i.imgur.com/Jc7xxX0.png" />
+          <div>PARENT</div>
         </Link>
         <Link className={`grayBody ${text}`} href="/logint">
           TEACHER

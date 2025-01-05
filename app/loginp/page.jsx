@@ -8,7 +8,7 @@ export default function Loginp() {
   let [pass, spass] = useState("");
   return (
     <div className={`${kodchasan.className} m-5 grayText`}>
-      <Link href="/idk" className="text-base flex">
+      <Link href="/login" className="text-base flex">
         {" "}
         {"< BACK"}{" "}
       </Link>

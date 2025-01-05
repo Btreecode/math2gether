@@ -1,42 +1,74 @@
 "use client";
-import { useState } from "react";
+import { useState, useContext } from "react";
 import { kodchasan } from "../../components/font-loader";
 import Link from "next/link";
+import AppContext from "@/components/app-context";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "@/lib/firebase/config";
+
+const ERR_MSGS = {
+  "auth/invalid-credential": "Incorrect email/password"
+};
 
 export default function Logins() {
-  let [user, suser] = useState("");
-  let [pass, spass] = useState("");
+  let [username, setUsername] = useState("");
+  let [password, setPassword] = useState("");
+  let [err, setErr] = useState(undefined);
+
+  let { setUser } = useContext(AppContext);
+
+  async function signInWithEmail(ev) {
+    ev.preventDefault();
+    setErr(undefined);
+    try {
+      await signInWithEmailAndPassword(auth, username, password);
+    } catch (e) {
+      console.log(123, e.code);
+      setErr(e.code);
+    }
+  }
+
   return (
     <div className={`${kodchasan.className} m-5 grayText`}>
-      <Link href="/idk" className="text-base flex">
+      <Link href="/login" className="text-base flex">
         {" "}
         {"< BACK"}{" "}
       </Link>
-      <div className="flex flex-col items-center">
-        <div className="text-xl ml-6 sm:text-2xl"> STUDENT LOGIN </div>
-        <div className="text-base mt-5 ml-10 sm:text-xl">
-          USERNAME:{" "}
-          <input
-            className="border px-2 text-lg"
-            placeHolder="ex. JohnDoe"
-            value={user}
-            onChange={(event) => suser(event.target.value)}
-          />
+
+      <form onSubmit={signInWithEmail}>
+        <div className="flex flex-col items-center">
+          <div className="text-xl sm:text-2xl"> STUDENT LOGIN </div>
+          <div className="text-base mt-5 sm:text-xl">
+            EMAIL:{" "}
+            <input
+              className="border px-2 text-lg"
+              placeholder="ex. JDoe@jd.com"
+              value={username}
+              onChange={(event) => setUsername(event.target.value)}
+            />
+          </div>
+          <div className="text-base mt-5 sm:text-xl">
+            PASSWORD:{" "}
+            <input
+              className="border px-2 text-lg"
+              placeholder="ex. JDoe123"
+              type="password"
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+            />
+          </div>
+          <button className="underline text-sm mt-3">
+            Forgot your password?
+          </button>
+          <button className="text-xl sm:text-2xl btn mt-4"> SIGN IN </button>
+
+          {
+            err && (
+              <div className="text-red-500">{ERR_MSGS[err] || "Please try again"}</div>
+            )
+          }
         </div>
-        <div className="text-base mt-5 ml-10 sm:text-xl">
-          PASSWORD:{" "}
-          <input
-            className="border px-2 text-lg"
-            placeHolder="ex. JDoe123"
-            type="password"
-            value={pass}
-            onChange={(event) => spass(event.target.value)}
-          />
-        </div>
-        <button className="underline text-sm mt-3">
-          Forgot your password?
-        </button>
-      </div>
+      </form>
     </div>
-  );
+  )
 }
