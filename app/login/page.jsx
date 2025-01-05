@@ -12,17 +12,17 @@ export default function Idk() {
       <div
         className={`grid grid-cols-3 ${kodchasan.className} text-lg sm:text-2xl grayText m-2 lg:mt-2 sm:m-5 lg:m-10 gap-2 sm:gap-5 lg:gap-10 `}
       >
-        <Link className={`blueBody ${text}`} href="/logins">
+        <Link className={`blueBody ${text}`} href="/logins?type=student">
           STUDENT
         </Link>
         <Link
           className={`yellowBody ${text} flex flex-col items-center justify-center`}
-          href="/loginp"
+          href="/logins?type=parent"
         >
           <img src="https://i.imgur.com/Jc7xxX0.png" />
           <div>PARENT</div>
         </Link>
-        <Link className={`grayBody ${text}`} href="/logint">
+        <Link className={`grayBody ${text}`} href="/logins?type=teacher">
           TEACHER
         </Link>
       </div>

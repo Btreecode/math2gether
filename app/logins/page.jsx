@@ -5,6 +5,7 @@ import Link from "next/link";
 import AppContext from "@/components/app-context";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/lib/firebase/config";
+import { useParams, useSearchParams } from "next/navigation";
 
 const ERR_MSGS = {
   "auth/invalid-credential": "Incorrect email/password"
@@ -14,7 +15,7 @@ export default function Logins() {
   let [username, setUsername] = useState("");
   let [password, setPassword] = useState("");
   let [err, setErr] = useState(undefined);
-
+  let type = useSearchParams().get("type");
   let { setUser } = useContext(AppContext);
 
   async function signInWithEmail(ev) {
@@ -37,7 +38,7 @@ export default function Logins() {
 
       <form onSubmit={signInWithEmail}>
         <div className="flex flex-col items-center">
-          <div className="text-xl sm:text-2xl"> STUDENT LOGIN </div>
+          <div className="text-xl sm:text-2xl"> {type?.toUpperCase()} LOGIN </div>
           <div className="text-base mt-5 sm:text-xl">
             EMAIL:{" "}
             <input
