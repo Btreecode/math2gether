@@ -1,17 +1,21 @@
 "use client";
-import { useState, useContext } from "react";
+import { useState, useContext, Suspense } from "react";
 import { kodchasan } from "../../components/font-loader";
 import Link from "next/link";
 import AppContext from "@/components/app-context";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/lib/firebase/config";
-import { useParams, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 
 const ERR_MSGS = {
   "auth/invalid-credential": "Incorrect email/password"
 };
 
 export default function Logins() {
+  return <Suspense><Logins2 /></Suspense>
+}
+
+function Logins2() {
   let [username, setUsername] = useState("");
   let [password, setPassword] = useState("");
   let [err, setErr] = useState(undefined);
