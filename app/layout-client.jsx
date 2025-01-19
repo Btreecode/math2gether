@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import Link from "next/link";
@@ -45,6 +46,7 @@ export default function LayoutClient({ children }) {
             <img
               src="https://i.imgur.com/bUyADUT.png"
               className="h-10 select-none"
+              alt=""
             />
           </Link>
           <div className="flex-1"></div>
@@ -54,7 +56,7 @@ export default function LayoutClient({ children }) {
             </button>
           ) : (
             <>
-              <Link href="/signup">
+              <Link href="/sign">
                 <button className="btn">Sign Up </button>
               </Link>
               <Link href="/login">
@@ -77,7 +79,6 @@ export default function LayoutClient({ children }) {
               <Child link="/about" name="About Us" />
               <Child link="/calendars" name="Calendar-student" />
               <Child link="/calendart" name="Calendar-teacher" />
-              <Child link="/idk" name="login" />
             </div>
           ) : undefined}
         </nav>
