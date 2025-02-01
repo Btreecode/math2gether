@@ -2,7 +2,7 @@
 import { Suspense, useContext, useState } from "react";
 import { kodchasan } from "../../components/font-loader";
 import AppContext from "@/components/app-context";
-import { addDoc, collection, doc, getDoc } from "firebase/firestore";
+import { addDoc, collection, doc, getDoc, setDoc } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase/config";
 import { parse } from "date-fns"
 import { createUserWithEmailAndPassword } from "firebase/auth"
@@ -20,11 +20,18 @@ export default function SignUp() {
 function SignUp2({ type }) {
   let { user, setUser } = useContext(AppContext);
   let [err, setErr] = useState(false);
+  let [wPass, setWPass] = useState(false);
 
   async function handleSubmit(ev) {
     ev.preventDefault();
+    setWPass(false);
+    setErr(false);
     const formData = Object.fromEntries(new FormData(ev.target))
-    if (formData.pswd != formData.cpswd) {
+    if (formData.pswd.length < 6) {
+      setWPass(true);
+      return;
+    }
+    else if (formData.pswd != formData.cpswd) {
       setErr(true);
       return;
     }
@@ -37,8 +44,8 @@ function SignUp2({ type }) {
     formData.uid = uid;
     formData.doe = new Date()
     let c = collection(db, "userData")
-    let { id } = await addDoc(c, formData)
-    let newDoc = await getDoc(doc(db, "userData", id))
+    await setDoc(doc(db, "userData", uid), formData);
+    let newDoc = await getDoc(doc(db, "userData", uid))
   }
   return (
     <div
@@ -57,6 +64,8 @@ function SignUp2({ type }) {
         <UserInput name="email" type="Email: " PH="example@email.com" itype="email" />
         <UserInput name="pswd" type="Password" itype="password" ph={false} />
         <UserInput name="cpswd" type="Confirm Password" itype="password" ph={false} />
+        {wPass && <div className="text-red-500 text-xs sm:text-sm -mt-2">Please make your password at least 6 characters long. </div>
+        }
         {err && <div className="text-red-500 text-xs sm:text-sm -mt-2">Passwords do not match. </div>
         }
 

@@ -8,13 +8,15 @@ import { useEffect, useState } from "react";
 import { GiHamburgerMenu } from "react-icons/gi";
 
 import { signOut, onAuthStateChanged } from "firebase/auth";
-import { auth } from "../lib/firebase/config";
+import { auth, db } from "../lib/firebase/config";
 import { useRouter } from 'next/navigation'
+import { doc, getDoc } from "firebase/firestore";
 
 
 export default function LayoutClient({ children }) {
   let [showPopup, setShowPopup] = useState(false);
   let [user, setUser] = useState(undefined);
+  let [userData, setUData] = useState(undefined);
   const router = useRouter()
 
   function logout() {
@@ -22,9 +24,11 @@ export default function LayoutClient({ children }) {
   }
 
   useEffect(() => {
-    onAuthStateChanged(auth, function (user) {
+    onAuthStateChanged(auth, async function (user) {
       if (user) {
         setUser(user)
+        const docSnap = await getDoc(doc(db, "userData", user.uid));
+        setUData(docSnap.data())
         router.push("/")
       }
       else {
@@ -33,7 +37,6 @@ export default function LayoutClient({ children }) {
 
     })
   }, [])
-
 
   return (
     <AppContext.Provider value={{ user, setUser }}>
@@ -77,8 +80,7 @@ export default function LayoutClient({ children }) {
             <div className="absolute border-2 grayBorder right-3 top-14 grayBody flex flex-col items-center text-center rounded-md select-none z-40">
               <Child link="/" name="Home" />
               <Child link="/about" name="About Us" />
-              <Child link="/calendars" name="Calendar-student" />
-              <Child link="/calendart" name="Calendar-teacher" />
+              <Child link={userData?.type == "teacher" ? "/teacherCalendar" : "/studentCalendar"} name="Calendar" />
             </div>
           ) : undefined}
         </nav>
