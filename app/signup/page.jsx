@@ -1,5 +1,5 @@
 "use client";
-import { useContext, useState } from "react";
+import { Suspense, useContext, useState } from "react";
 import { kodchasan } from "../../components/font-loader";
 import AppContext from "@/components/app-context";
 import { addDoc, collection, doc, getDoc } from "firebase/firestore";
@@ -9,9 +9,17 @@ import { createUserWithEmailAndPassword } from "firebase/auth"
 import { useSearchParams } from "next/navigation";
 
 export default function SignUp() {
+  let params = useSearchParams();
+  let type = params.get("type");
+
+
+  return <SignUp2 type={type} />;
+  return <Suspense><SignUp2 type={undefined} /></Suspense>
+}
+
+function SignUp2({ type }) {
   let { user, setUser } = useContext(AppContext);
   let [err, setErr] = useState(false);
-  let params = useSearchParams();
 
   async function handleSubmit(ev) {
     ev.preventDefault();
@@ -25,7 +33,7 @@ export default function SignUp() {
 
     formData.grade = parseInt(formData.grade)
     formData.bday = parse(formData.bday, 'yyyy-MM-dd', new Date())
-    formData.type = "Student"
+    formData.type = type;
     formData.uid = uid;
     formData.doe = new Date()
     let c = collection(db, "userData")
@@ -37,7 +45,7 @@ export default function SignUp() {
       className={`${kodchasan.className} grayText text-base sm:text-xl`}
     >
       <form className="flex flex-col items-center" onSubmit={handleSubmit}>
-        <div className="grayText m-5 text-xl sm:text-2xl">{params.get("type").toUpperCase()} SIGN UP</div>
+        <div className="grayText m-5 text-xl sm:text-2xl">{type.toUpperCase()} SIGN UP</div>
 
         <UserInput name="fname" type="First Name: " PH="John" />
         <UserInput name="pname" type="Preferred Name (Optional) " PH="Johnny" req={false} />
