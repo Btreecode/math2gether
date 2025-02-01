@@ -7,6 +7,7 @@ import { auth, db } from "@/lib/firebase/config";
 import { parse } from "date-fns"
 import { createUserWithEmailAndPassword } from "firebase/auth"
 import { useSearchParams } from "next/navigation";
+import Link from "next/dist/client/link";
 
 export default function SignUp() {
   let params = useSearchParams();
@@ -14,7 +15,6 @@ export default function SignUp() {
 
 
   return <SignUp2 type={type} />;
-  return <Suspense><SignUp2 type={undefined} /></Suspense>
 }
 
 function SignUp2({ type }) {
@@ -51,6 +51,10 @@ function SignUp2({ type }) {
     <div
       className={`${kodchasan.className} grayText text-base sm:text-xl`}
     >
+      <Link href="/sign" className="text-base flex m-5">
+        {" "}
+        {"< BACK"}{" "}
+      </Link>
       <form className="flex flex-col items-center" onSubmit={handleSubmit}>
         <div className="grayText m-5 text-xl sm:text-2xl">{type.toUpperCase()} SIGN UP</div>
 

@@ -31,11 +31,6 @@ function Logins2() {
 
   return (
     <div className={`${kodchasan.className} m-5 grayText`}>
-      <Link href="/login" className="text-base flex">
-        {" "}
-        {"< BACK"}{" "}
-      </Link>
-
       <form onSubmit={signInWithEmail}>
         <div className="flex flex-col items-center">
           <div className="text-xl sm:text-2xl"> LOGIN </div>
