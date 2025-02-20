@@ -62,6 +62,8 @@ function Logins2() {
           }
         </div>
       </form>
+      <button className="btn btn-primary" onClick={()=>signInWithEmailAndPassword(auth, "test2@test", "test123")}>student</button>
+      <button className="btn btn-primary" onClick={()=>signInWithEmailAndPassword(auth, "jennyjaeheepark@gmail.com", "test123")}>admin/teacher</button>
     </div>
   )
 }
