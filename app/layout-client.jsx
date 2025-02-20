@@ -34,12 +34,11 @@ export default function LayoutClient({ children }) {
       else {
         setUser(null);
       }
-
     })
   }, [])
 
   return (
-    <AppContext.Provider value={{ user, setUser }}>
+    <AppContext.Provider value={{ user, userData, setUser }}>
       <div onClick={() => setShowPopup(false)}>
         <nav
           className={`flex space-x-3 p-2 blueBorder text-xl grayText items-center ${kodchasan.className}`}
@@ -80,7 +79,10 @@ export default function LayoutClient({ children }) {
             <div className="absolute border-2 grayBorder right-3 top-14 grayBody flex flex-col items-center text-center rounded-md select-none z-40">
               <Child link="/" name="Home" />
               <Child link="/about" name="About Us" />
-              <Child link={userData?.type == "teacher" ? "/teacherCalendar" : "/studentCalendar"} name="Calendar" />
+              <Child link={"/calendar"} name="Calendar" />
+              {
+                userData.isAdmin ? <Child link={"/admin"} name="Admin" /> : undefined
+              }
             </div>
           ) : undefined}
         </nav>

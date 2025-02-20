@@ -1,7 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { kodchasan, openSans } from "../../components/font-loader";
+import AppContext from "@/components/app-context";
+import { collection, getDocs, query, where } from "firebase/firestore";
+import { db } from "@/lib/firebase/config";
+import { startOfMonth, endOfMonth } from "date-fns";
 
 let months = [
   "January",
@@ -17,14 +21,26 @@ let months = [
   "November",
   "December",
 ];
-export default function Calendart() {
+export default function Calendars() {
+  let { user, setUser } = useContext(AppContext);
   let [d, setD] = useState(new Date());
   let [popup, setPopup] = useState(false);
-  let [canceledDates, setCD] = useState([
-    "2024-10-12",
-    "2024-10-19",
-    "2024-11-2",
-  ]);
+  let [canceledDates, setCD] = useState([]);
+
+  async function loadCancellations() {
+    let c = collection(db, "classes");
+    let { docs } = await getDocs(query(c, where("date", ">=", startOfMonth(d)), where("date", "<=", endOfMonth(d))));
+
+    for (let doc of docs) {
+      console.log(doc.data());
+
+    }
+    setCD(docs);
+  }
+
+  useEffect(() => {
+    loadCancellations();
+  }, []);
 
   let now = new Date();
   function onchange(a) {
@@ -56,22 +72,18 @@ export default function Calendart() {
     let dStr = d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + popup.date;
     setCD(canceledDates.filter((v) => v !== dStr));
 
-    // let popupCopy = { ...popup };
-    // popupCopy.isCanceled = false;
-    // setPopup(popupCopy);
-    alert("Thank you for your response! See you during class!");
-    setPopup(undefined);
+    let popupCopy = { ...popup };
+    popupCopy.isCanceled = false;
+    setPopup(popupCopy);
   }
 
-  function doCancel() {
+  async function doCancel() {
     let dStr = d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + popup.date;
     setCD([...canceledDates, dStr]);
 
-    // let popupCopy = { ...popup };
-    // popupCopy.isCanceled = true;
-    // setPopup(popupCopy);
-    alert("Thank you for your response! You will be marked as absent.");
-    setPopup(undefined);
+    let popupCopy = { ...popup };
+    popupCopy.isCanceled = true;
+    setPopup(popupCopy);
   }
 
   return (
@@ -153,14 +165,14 @@ export default function Calendart() {
           ((new Date(d.getFullYear(), d.getMonth()).getDay() +
             getDaysInMnth(new Date(d.getFullYear(), d.getMonth()))) %
             7) ==
-        7
+          7
           ? ""
           : new Array(
-              7 -
-                ((new Date(d.getFullYear(), d.getMonth()).getDay() +
-                  getDaysInMnth(new Date(d.getFullYear(), d.getMonth()))) %
-                  7)
-            ).fill(<Cell />)}
+            7 -
+            ((new Date(d.getFullYear(), d.getMonth()).getDay() +
+              getDaysInMnth(new Date(d.getFullYear(), d.getMonth()))) %
+              7)
+          ).fill(<Cell />)}
       </div>
       {popup ? (
         <Popup
@@ -168,20 +180,94 @@ export default function Calendart() {
           close={() => setPopup(false)}
           doCancel={doCancel}
           doSignup={doSignup}
+          canceledDates={canceledDates}
         />
       ) : undefined}
     </div>
   );
 }
 
-function Popup({ popup, close, doCancel, doSignup }) {
+function Popup(props) {
+  let { userData } = useContext(AppContext);
+  if (userData.isAdmin)
+    return <AdminPopup {...props} />
+  else if (userData.type == "teacher")
+    return <TeacherPopup {...props} />
+  else
+    return <StudentPopup {...props} />
+}
+
+function AdminPopup(canceledDates) {
+  // console.log("123", canceledDates)
+  return (
+    <div>
+      <div>admin</div>
+    </div>
+  )
+}
+
+function StudentPopup({ popup, close, doCancel, doSignup }) {
+  let { date, month, isCanceled } = popup;
+  return (
+    <div
+      className={`p-3 absolute grayText rounded-xl border-4 ${kodchasan.className
+        } w-72 sm:w-96
+          ${!isCanceled ? `lightBlueBody blueBorder` : `lightRedBody redBorder`}
+        `}
+      style={{
+        top: 150,
+        left: 50,
+      }}
+      onClick={(event) => {
+        event.stopPropagation();
+      }}
+    >
+      <div className="absolute top-2 right-3">
+        <button onClick={close}>x</button>
+      </div>
+      <div className="pb-2"> Class for {months[month] + " " + date} </div>
+      {!isCanceled ? (
+        <div className="">
+          <div className="flex justify-center">
+            You are enrolled for this class.{" "}
+          </div>
+          <div className="flex justify-center">
+            <button
+              className="darkBlueBorder border-4 rounded-xl p-1 px-2 blueBody"
+              onClick={doCancel}
+            >
+              {" "}
+              CANCEL
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div className="">
+          <div className="text-center">
+            You are not enrolled for this class.
+          </div>
+          <div className="flex justify-center">
+            <button
+              className="darkRedBorder border-4 rounded-xl p-1 px-2 redBody"
+              onClick={doSignup}
+            >
+              {" "}
+              SIGN UP
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function TeacherPopup({ popup, close, doCancel, doSignup }) {
   let { date, month, isCanceled } = popup;
   let [text, setText] = useState("");
   return (
     <div
-      className={`p-5 absolute grayText rounded-xl border-4 select-none ${
-        kodchasan.className
-      } w-72 sm:w-96
+      className={`p-5 absolute grayText rounded-xl border-4 select-none ${kodchasan.className
+        } w-72 sm:w-96
           ${!isCanceled ? `lightBlueBody blueBorder` : `lightRedBody redBorder`}
         `}
       style={{

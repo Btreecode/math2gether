@@ -1,8 +1,6 @@
 "use client";
-import { useState, useContext, Suspense } from "react";
+import { useState, Suspense } from "react";
 import { kodchasan } from "../../components/font-loader";
-import Link from "next/link";
-import AppContext from "@/components/app-context";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/lib/firebase/config";
 
