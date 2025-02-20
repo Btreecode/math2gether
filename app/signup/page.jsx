@@ -1,8 +1,8 @@
 "use client";
-import { Suspense, useContext, useState } from "react";
+import { useContext, useState } from "react";
 import { kodchasan } from "../../components/font-loader";
 import AppContext from "@/components/app-context";
-import { addDoc, collection, doc, getDoc, setDoc } from "firebase/firestore";
+import { collection, doc, getDoc, setDoc } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase/config";
 import { parse } from "date-fns"
 import { createUserWithEmailAndPassword } from "firebase/auth"
@@ -43,6 +43,8 @@ function SignUp2({ type }) {
     formData.type = type;
     formData.uid = uid;
     formData.doe = new Date()
+    delete formData.pswd;
+    delete formData.cpswd;
     let c = collection(db, "userData")
     await setDoc(doc(db, "userData", uid), formData);
     let newDoc = await getDoc(doc(db, "userData", uid))
