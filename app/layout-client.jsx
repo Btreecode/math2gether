@@ -1,24 +1,42 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import Link from "next/link";
 import AppContext from "../components/app-context";
 import { kodchasan } from "../components/font-loader";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { GiHamburgerMenu } from "react-icons/gi";
 
-const DEF_USER = { id: "test-student" };
+import { signOut, onAuthStateChanged } from "firebase/auth";
+import { auth, db } from "../lib/firebase/config";
+import { useRouter } from 'next/navigation'
+import { doc, getDoc } from "firebase/firestore";
+
 
 export default function LayoutClient({ children }) {
-  let [user, setUser] = useState(null);
   let [showPopup, setShowPopup] = useState(false);
+  let [user, setUser] = useState(undefined);
+  let [userData, setUData] = useState(undefined);
+  const router = useRouter()
 
-  function doLogin() {
-    setUser(DEF_USER);
+  function logout() {
+    signOut(auth);
   }
 
-  function doLogOut() {
-    setUser(undefined);
-  }
+  useEffect(() => {
+    onAuthStateChanged(auth, async function (user) {
+      if (user) {
+        setUser(user)
+        const docSnap = await getDoc(doc(db, "userData", user.uid));
+        setUData(docSnap.data())
+        router.push("/")
+      }
+      else {
+        setUser(null);
+      }
+
+    })
+  }, [])
 
   return (
     <AppContext.Provider value={{ user, setUser }}>
@@ -31,25 +49,23 @@ export default function LayoutClient({ children }) {
             <img
               src="https://i.imgur.com/bUyADUT.png"
               className="h-10 select-none"
+              alt=""
             />
           </Link>
           <div className="flex-1"></div>
           {user ? (
-            <div>
-              Hi User
-              <button className="btn" onClick={doLogOut}>
-                Log Out
-              </button>
-            </div>
+            <button className="btn" onClick={logout}>
+              Log Out{" "}
+            </button>
           ) : (
-            <div className="hidden sm:block space-x-2">
-              <button className="btn" onClick={doLogin}>
-                Log In
-              </button>
-              <button className="btn" onClick={doLogin}>
-                Sign Up
-              </button>
-            </div>
+            <>
+              <Link href="/sign">
+                <button className="btn">Sign Up </button>
+              </Link>
+              <Link href="/login">
+                <button className="btn">Log In </button>
+              </Link>{" "}
+            </>
           )}
           <div
             onClick={(event) => {
@@ -61,12 +77,10 @@ export default function LayoutClient({ children }) {
             <GiHamburgerMenu />
           </div>
           {showPopup ? (
-            <div className="absolute border-2 grayBorder right-3 top-14 grayBody flex flex-col items-center text-center rounded-md select-none">
+            <div className="absolute border-2 grayBorder right-3 top-14 grayBody flex flex-col items-center text-center rounded-md select-none z-40">
               <Child link="/" name="Home" />
               <Child link="/about" name="About Us" />
-              <Child link="/calendars" name="Calendar-student" />
-              <Child link="/calendart" name="Calendar-teacher" />
-              <Child link="/idk" name="idk" />
+              <Child link={userData?.type == "teacher" ? "/teacherCalendar" : "/studentCalendar"} name="Calendar" />
             </div>
           ) : undefined}
         </nav>
@@ -84,16 +98,5 @@ function Child({ link, name }) {
     >
       {name}
     </Link>
-  );
-}
-
-function Login({ name, func }) {
-  return (
-    <div
-      className="border border-2 grayBorder p-2 w-32 hover:darkGrayBody"
-      onClick={func}
-    >
-      {name}
-    </div>
   );
 }

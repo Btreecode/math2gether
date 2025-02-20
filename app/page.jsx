@@ -21,8 +21,8 @@ function Top() {
 
   return (
     <div className={`grid grid-cols-7 mt-5 ${openSans.className}`}>
-      <div className="col-span-7 h-52 sm:h-auto sm:col-span-3">
-      <MyCarousel/>
+      <div className="col-span-7 sm:h-auto sm:col-span-3">
+        <MyCarousel/>
       </div>
       <div className="blueBody col-span-7 sm:col-span-4 p-5 md:p-7 grayText sm:py-7 md:py-10 lg:p-10 lg:py-14 text-base lg:text-xl xl:text-2xl">
         {" "}
