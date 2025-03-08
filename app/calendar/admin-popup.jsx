@@ -17,7 +17,13 @@ export default function AdminPopup({ popup }) {
   let [records, setRecords] = useState([]);
 
   async function loadActiveStudents() {
-    const snapshot = await getDocs(collection(db, "userData"));
+    let c = collection(db, "userData");
+    let q = query(
+      c,
+      where("type", "==", "student"),
+      where("is_active", "==", true)
+    );
+    const snapshot = await getDocs(q);
     const docs = snapshot.docs;
     setAllStudents(docs);
   }
@@ -31,18 +37,34 @@ export default function AdminPopup({ popup }) {
     const snapshot = await getDocs(q);
     const docs = snapshot.docs;
     setRecords(docs);
-    let ids = docs.map(d => d.id);
+    let ids = docs.map((d) => d.data().uid);
+    if (ids.length === 0)
+      return;
 
     // today or future
-    // if (d >= )
+    if (isBefore(d, new Date())) {
+      loadStudents(ids);
+    } else {
+      loadActiveStudents();
+    }
+
+    // if (d >= new Date())
     //   loadActiveStudents()
     // else
     //   loadStudents(ids)
+  }
 
+  async function loadStudents(ids) {
+    let c = collection(db, "userData");
+    let q = query(c, where("uid", "in", ids));
+    const snapshot = await getDocs(q);
+    const docs = snapshot.docs;
+    console.log("ids", ids);
+    console.log("loaded", docs);
+    setAllStudents(docs);
   }
 
   async function updateRecord(sid, type) {
-
     const q = query(
       collection(db, "records"),
       where("date", ">=", startOfDay(d)),
@@ -52,16 +74,15 @@ export default function AdminPopup({ popup }) {
     const snapshot = await getDocs(q);
     const docs = snapshot.docs;
 
-    docs.forEach(d => {
-      const docRef = doc(db, "records", d.id)
+    docs.forEach((d) => {
+      const docRef = doc(db, "records", d.id);
       deleteDoc(docRef);
-
     });
 
     const docRef = await addDoc(collection(db, "records"), {
       date: d,
       type: type,
-      uid: sid
+      uid: sid,
     });
 
     loadRecords();
@@ -74,8 +95,8 @@ export default function AdminPopup({ popup }) {
 
   return (
     <div>
-      <div>{isBefore(d, startOfDay(new Date())) ? 1 : 0}</div>
       <h1>Students</h1>
+      <div>{records.length} records</div>
       <div>
         {allStudents
           .filter((s) => s.data().type === "student")
@@ -136,15 +157,17 @@ function Student({ s, records, updateRecord }) {
       </div>
       <div>
         <button
-          className={`border px-2 py-0.5 ${isPresent ? "bg-green-300" : "bg-gray-100"
-            }`}
+          className={`border px-2 py-0.5 ${
+            isPresent ? "bg-green-300" : "bg-gray-100"
+          }`}
           onClick={() => updateRecord(s.id, "present")}
         >
           P
         </button>
         <button
-          className={`border px-2 py-0.5 ${isAbsent ? "bg-red-300" : "bg-gray-100"
-            }`}
+          className={`border px-2 py-0.5 ${
+            isAbsent ? "bg-red-300" : "bg-gray-100"
+          }`}
           onClick={() => updateRecord(s.id, "absent")}
         >
           A

@@ -19,6 +19,7 @@
   @apply yellowBody yellowBorder hover:darkYellowBody border-4 p-1 grayText rounded px-3;
 }
 
+
 .yellowBorder {
   border-color: rgba(254, 218, 81, 1);
 }
@@ -73,4 +74,14 @@
 
 .lightRedBody {
   background-color: rgba(235, 119, 122, 0.5);
+}
+
+table.admin-table {
+  /* border: 1px solid gray; */
+  border-collapse: collapse;
+}
+
+table.admin-table td, table.admin-table th {
+  border: 1px solid gray;
+  padding: 1px;
 }
