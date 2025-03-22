@@ -2,8 +2,17 @@
 
 import AppContext from "@/components/app-context";
 import { db } from "@/lib/firebase/config";
-import { endOfMonth, setDate, startOfMonth } from "date-fns";
-import { collection, getDocs, query, where } from "firebase/firestore";
+import { endOfMonth, setDate, startOfMonth, isSameDay } from "date-fns";
+import {
+  addDoc,
+  collection,
+  deleteDoc,
+  doc,
+  getDoc,
+  getDocs,
+  query,
+  where,
+} from "firebase/firestore";
 import { useContext, useEffect, useState } from "react";
 import { kodchasan, openSans } from "../../components/font-loader";
 import AdminPopup from "./admin-popup";
@@ -26,27 +35,24 @@ export default function Calendars() {
   let { user, setUser } = useContext(AppContext);
   let [d, setD] = useState(new Date());
   let [popup, setPopup] = useState(false);
-  let [canceledDates, setCD] = useState([]);
+  let [myRecords, setMyRecords] = useState([]);
 
-  async function loadCancellations() {
-    let c = collection(db, "classes");
+  async function loadRecords() {
+    let c = collection(db, "records");
     let { docs } = await getDocs(
       query(
         c,
         where("date", ">=", startOfMonth(d)),
-        where("date", "<=", endOfMonth(d))
+        where("date", "<=", endOfMonth(d)),
+        where("uid", "==", user.uid)
       )
     );
-
-    for (let doc of docs) {
-      console.log(doc.data());
-    }
-    setCD(docs);
+    setMyRecords(docs);
   }
 
   useEffect(() => {
-    loadCancellations();
-  }, []);
+    if (user) loadRecords();
+  }, [user]);
 
   let now = new Date();
   function onchange(a) {
@@ -70,27 +76,25 @@ export default function Calendars() {
   }
 
   function isCanceled(i) {
-    return canceledDates.includes(
-      d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + i
-    );
+    // return canceledDates.includes(
+    //   d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + i
+    // );
   }
 
   function doSignup() {
-    let dStr = d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + popup.date;
-    setCD(canceledDates.filter((v) => v !== dStr));
-
-    let popupCopy = { ...popup };
-    popupCopy.isCanceled = false;
-    setPopup(popupCopy);
+    // let dStr = d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + popup.date;
+    // setCD(canceledDates.filter((v) => v !== dStr));
+    // let popupCopy = { ...popup };
+    // popupCopy.isCanceled = false;
+    // setPopup(popupCopy);
   }
 
   async function doCancel() {
-    let dStr = d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + popup.date;
-    setCD([...canceledDates, dStr]);
-
-    let popupCopy = { ...popup };
-    popupCopy.isCanceled = true;
-    setPopup(popupCopy);
+    // let dStr = d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + popup.date;
+    // setCD([...canceledDates, dStr]);
+    // let popupCopy = { ...popup };
+    // popupCopy.isCanceled = true;
+    // setPopup(popupCopy);
   }
 
   return (
@@ -140,9 +144,11 @@ export default function Calendars() {
         ))}
       </div>
       <div className="grid grid-cols-7 m-4 border-l border-b">
-        {new Array(new Date(d.getFullYear(), d.getMonth()).getDay()).fill(
-          <Cell />
-        )}
+        {new Array(new Date(d.getFullYear(), d.getMonth()).getDay())
+          .fill(0)
+          .map((v, i) => (
+            <Cell key={i} />
+          ))}
         {new Array(getDaysInMnth(d)).fill(0).map((a, i) => (
           <div
             key={i}
@@ -155,14 +161,24 @@ export default function Calendars() {
               if (getDay(i + 1) == 6) {
                 ev.stopPropagation();
                 setPopup({
-                  d: setDate(d, i+1), /* calendar date (2025/01/01) */
+                  d: setDate(d, i + 1) /* calendar date (2025/01/01) */,
                   isCanceled: isCanceled(i + 1),
                 });
               }
             }}
           >
             <div className="flex justify-end">{i + 1}</div>
-            <div>{getDay(i + 1) == 6 ? <Class /> : ""}</div>
+            <div>
+              {getDay(i + 1) == 6 ? (
+                <ClassComponent
+                  classRecords={myRecords.filter((v) =>
+                    isSameDay(v.data().date.toDate(), setDate(d, i + 1))
+                  )}
+                />
+              ) : (
+                ""
+              )}
+            </div>
             <div>
               {getDay(i + 1) == 6 && isCanceled(i + 1) ? "canceled" : ""}
             </div>
@@ -185,16 +201,15 @@ export default function Calendars() {
         <Popup
           popup={popup}
           close={() => setPopup(false)}
-          doCancel={doCancel}
-          doSignup={doSignup}
-          canceledDates={canceledDates}
+          myRecords={myRecords}
+          setMyRecords={setMyRecords}
         />
       ) : undefined}
     </div>
   );
 }
 
-function Popup({ close, ...props }) {
+function Popup({ close, popup, myRecords, setMyRecords }) {
   let { userData } = useContext(AppContext);
 
   // if (userData.isAdmin) return <AdminPopup {...props} />;
@@ -216,64 +231,80 @@ function Popup({ close, ...props }) {
         <button onClick={close}>x</button>
       </div>
 
-      <div>{userData.isAdmin ? <AdminPopup {...props} /> : undefined}</div>
+      <div>
+        {userData.isAdmin ? (
+          <AdminPopup popup={popup} />
+        ) : (
+          <StudentPopup
+            popup={popup}
+            myRecords={myRecords}
+            setMyRecords={setMyRecords}
+          />
+        )}
+      </div>
     </div>
   );
 }
 
-function StudentPopup({ popup, close, doCancel, doSignup }) {
-  let { date, month, isCanceled } = popup;
+function StudentPopup({ popup, myRecords, setMyRecords }) {
+  let { d } = popup;
+  let { user } = useContext(AppContext);
+  let todaysRecords = myRecords.filter((v) =>
+    isSameDay(v.data().date.toDate(), d)
+  );
+  console.log(todaysRecords);
+  let todaysRecord = todaysRecords.length === 0 ? undefined : todaysRecords[0];
+  let isCancelled = todaysRecord?.data().type === "absent";
+
+  async function doSignup() {
+    if (todaysRecord) {
+      setMyRecords(myRecords.filter((v) => v.id !== todaysRecord.id));
+      await deleteDoc(doc(db, "records", todaysRecord.id));
+    }
+  }
+  async function doCancel() {
+    if (todaysRecord) {
+      setMyRecords((myRecords) =>
+        myRecords.filter((v) => v.id !== todaysRecord.id)
+      );
+      await deleteDoc(doc(db, "records", todaysRecord.id));
+    }
+
+    const ref = collection(db, "records");
+    let docRef = await addDoc(ref, {
+      date: d,
+      type: "absent",
+      uid: user.uid,
+    });
+
+    let newRecord = await getDoc(doc(db, "records", docRef.id));
+    setMyRecords((myRecords) => [...myRecords, newRecord]);
+  }
+
   return (
-    <div
-      className={`p-3 absolute grayText rounded-xl border-4 ${
-        kodchasan.className
-      } w-72 sm:w-96
-          ${!isCanceled ? `lightBlueBody blueBorder` : `lightRedBody redBorder`}
-        `}
-      style={{
-        top: 150,
-        left: 50,
-      }}
-      onClick={(event) => {
-        event.stopPropagation();
-      }}
-    >
-      <div className="absolute top-2 right-3">
-        <button onClick={close}>x</button>
+    <>
+      <div className="pb-2">
+        {" "}
+        Class for {d.toLocaleDateString()} ({todaysRecord?.data().type})
       </div>
-      <div className="pb-2"> Class for {months[month] + " " + date} </div>
-      {!isCanceled ? (
-        <div className="">
-          <div className="flex justify-center">
-            You are enrolled for this class.{" "}
-          </div>
-          <div className="flex justify-center">
-            <button
-              className="darkBlueBorder border-4 rounded-xl p-1 px-2 blueBody"
-              onClick={doCancel}
-            >
-              {" "}
-              CANCEL
-            </button>
-          </div>
+      <div className="">
+        <div className="flex justify-center">
+          {isCancelled
+            ? "You are not coming on this date"
+            : "You are signed up on this date"}
         </div>
-      ) : (
-        <div className="">
-          <div className="text-center">
-            You are not enrolled for this class.
-          </div>
-          <div className="flex justify-center">
-            <button
-              className="darkRedBorder border-4 rounded-xl p-1 px-2 redBody"
-              onClick={doSignup}
-            >
-              {" "}
-              SIGN UP
-            </button>
-          </div>
+        <div className="flex justify-center">
+          <button
+            className="darkBlueBorder border-4 rounded-xl p-1 px-2 blueBody"
+            onClick={() => {
+              isCancelled ? doSignup() : doCancel();
+            }}
+          >
+            {isCancelled ? "Sign Up" : "Cancel"}
+          </button>
         </div>
-      )}
-    </div>
+      </div>
+    </>
   );
 }
 
@@ -352,7 +383,12 @@ function Cell() {
   );
 }
 
-function Class() {
+function ClassComponent({ classRecords }) {
+  let type = "";
+  if (classRecords.length > 0) {
+    type = classRecords[0].data().type;
+  }
+
   return (
     <div>
       <div />
@@ -361,6 +397,8 @@ function Class() {
         src="https://i.imgur.com/qBZge9r.png"
         style={{ filter: "sephia(100%)" }}
       />
+      {type === "absent" && "ABSENT"}
+      {type === "present" && "PRESENT"}
     </div>
   );
 }

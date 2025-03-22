@@ -38,11 +38,9 @@ export default function AdminPopup({ popup }) {
     const docs = snapshot.docs;
     setRecords(docs);
     let ids = docs.map((d) => d.data().uid);
-    if (ids.length === 0)
-      return;
-
+    
     // today or future
-    if (isBefore(d, new Date())) {
+    if (false && isBefore(d, new Date())) {
       loadStudents(ids);
     } else {
       loadActiveStudents();
