@@ -4,24 +4,18 @@ import AppContext from "@/components/app-context";
 import { db } from "@/lib/firebase/config";
 import {
   endOfMonth,
-  setDate,
-  startOfMonth,
+  isBefore,
   isSameDay,
   isSameMonth,
+  setDate,
+  startOfMonth,
 } from "date-fns";
-import {
-  addDoc,
-  collection,
-  deleteDoc,
-  doc,
-  getDoc,
-  getDocs,
-  query,
-  where,
-} from "firebase/firestore";
+import { collection, getDocs, query, where } from "firebase/firestore";
 import { useContext, useEffect, useState } from "react";
 import { kodchasan, openSans } from "../../components/font-loader";
 import AdminPopup from "./admin-popup";
+import StudentPopup from "./student-popup";
+import { FaCheckCircle, FaCross, FaTimesCircle } from "react-icons/fa";
 
 let months = [
   "January",
@@ -168,6 +162,7 @@ export default function Calendars() {
               }
             `}
             onClick={(ev) => {
+              if (isBefore(setDate(d, i + 1), new Date())) return;
               if (getDay(i + 1) == 6) {
                 ev.stopPropagation();
                 setPopup({
@@ -256,137 +251,6 @@ function Popup({ close, popup, myRecords, setMyRecords }) {
   );
 }
 
-function StudentPopup({ popup, myRecords, setMyRecords }) {
-  let { d } = popup;
-  let { user } = useContext(AppContext);
-  let todaysRecords = myRecords.filter((v) =>
-    isSameDay(v.data().date.toDate(), d)
-  );
-  console.log(todaysRecords);
-  let todaysRecord = todaysRecords.length === 0 ? undefined : todaysRecords[0];
-  let isCancelled = todaysRecord?.data().type === "absent";
-
-  async function doSignup() {
-    if (todaysRecord) {
-      setMyRecords(myRecords.filter((v) => v.id !== todaysRecord.id));
-      await deleteDoc(doc(db, "records", todaysRecord.id));
-    }
-  }
-  async function doCancel() {
-    if (todaysRecord) {
-      setMyRecords((myRecords) =>
-        myRecords.filter((v) => v.id !== todaysRecord.id)
-      );
-      await deleteDoc(doc(db, "records", todaysRecord.id));
-    }
-
-    const ref = collection(db, "records");
-    let docRef = await addDoc(ref, {
-      date: d,
-      type: "absent",
-      uid: user.uid,
-    });
-
-    let newRecord = await getDoc(doc(db, "records", docRef.id));
-    setMyRecords((myRecords) => [...myRecords, newRecord]);
-  }
-
-  return (
-    <>
-      <div className="pb-2">
-        {" "}
-        Class for {d.toLocaleDateString()} ({todaysRecord?.data().type})
-      </div>
-      <div className="">
-        <div className="flex justify-center">
-          {isCancelled
-            ? "You are not coming on this date"
-            : "You are signed up on this date"}
-        </div>
-        <div className="flex justify-center">
-          <button
-            className="darkBlueBorder border-4 rounded-xl p-1 px-2 blueBody"
-            onClick={() => {
-              isCancelled ? doSignup() : doCancel();
-            }}
-          >
-            {isCancelled ? "Sign Up" : "Cancel"}
-          </button>
-        </div>
-      </div>
-    </>
-  );
-}
-
-function TeacherPopup({ popup, close, doCancel, doSignup }) {
-  let { date, month, isCanceled } = popup;
-  let [text, setText] = useState("");
-  return (
-    <div
-      className={`p-5 absolute grayText rounded-xl border-4 select-none ${
-        kodchasan.className
-      } w-72 sm:w-96
-          ${!isCanceled ? `lightBlueBody blueBorder` : `lightRedBody redBorder`}
-        `}
-      style={{
-        top: 150,
-        left: 50,
-      }}
-      onClick={(event) => {
-        event.stopPropagation();
-      }}
-    >
-      <div className="absolute top-2 right-3">
-        <button onClick={close}>x</button>
-      </div>
-      <div className="pb-2 text-lg text-bold">
-        {" "}
-        Class for {months[month] + " " + date}{" "}
-      </div>
-      {!isCanceled ? (
-        <div className="">
-          <div className="flex justify-center">
-            You are teaching on this date.{" "}
-          </div>
-          <div className="py-2">
-            If you are unable to attend, please explain below:
-          </div>
-          <textarea
-            onChange={(ev) => setText(ev.target.value)}
-            value={text}
-            rows={5}
-            className="border-2 w-64 sm:w-80 rounded-lg resize-none p-2"
-            placeholder="Reason for absence.."
-          />
-          <div className="flex justify-center">
-            <button
-              className="darkBlueBorder border-4 rounded-xl p-1 px-2 m-3 blueBody disabled:disabledBlueBody "
-              onClick={doCancel}
-              disabled={text.length === 0}
-            >
-              {" "}
-              SUBMIT
-            </button>
-          </div>
-        </div>
-      ) : (
-        <div className="">
-          <div className="text-center">You are not teaching on this date.</div>
-          <div className="flex justify-center">
-            <button
-              className="darkRedBorder border-4 rounded-xl p-1 px-2 m-3 redBody"
-              onClick={doSignup}
-            >
-              {" "}
-              AVAILABLE
-            </button>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
 function Cell() {
   return (
     <div className="text-right border border-l-0 border-b-0 p-2 h-28 flex justify-end"></div>
@@ -400,15 +264,20 @@ function ClassComponent({ classRecords }) {
   }
 
   return (
-    <div>
-      <div />
+    <div className="relative">
       <img
         className="h-12"
         src="https://i.imgur.com/qBZge9r.png"
         style={{ filter: "sephia(100%)" }}
       />
-      {type === "absent" && "ABSENT"}
-      {type === "present" && "PRESENT"}
+      <div className="absolute bottom-0 left-10">
+        {type === "absent" && (
+          <FaTimesCircle className="text-2xl text-red-700" />
+        )}
+        {type === "present" && (
+          <FaCheckCircle className="text-2xl text-green-700" />
+        )}
+      </div>
     </div>
   );
 }

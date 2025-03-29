@@ -12,6 +12,7 @@ import {
   updateDoc,
   where,
 } from "firebase/firestore";
+import Link from "next/link";
 
 export default function AdminStudentsPage() {
   let [students, setS] = useState([]);
@@ -71,16 +72,14 @@ function Table({ students, changeActiveStatus, last_updated_id, is_active }) {
   return (
     <table className="admin-table">
       <tr>
-        <th colSpan={2} width={150}>
-          Name
-        </th>
+        <th width={150}>Name</th>
         <th>Date of Enrollment</th>
         <th>type</th>
         <th></th>
       </tr>
       {students
         .filter((s) => !!s.data().is_active === is_active)
-        .filter(s=>s.data().type === "student")
+        .filter((s) => s.data().type === "student")
         .map((s) => (
           <tr
             key={s.id}
@@ -88,8 +87,11 @@ function Table({ students, changeActiveStatus, last_updated_id, is_active }) {
                 duration-150
                 ${last_updated_id === s.id ? "bg-green-300" : "bg-white"}`}
           >
-            <td>{s.data().fname}</td>
-            <td>{s.data().lname}</td>
+            <td>
+              <Link href={`/admin/student/${s.id}`} className="link-text">
+                {s.data().fname} {s.data().lname}
+              </Link>
+            </td>
             <td>{s.data().doe.toDate().toLocaleDateString()}</td>
             <td>{s.data().type}</td>
             <td>
