@@ -2,7 +2,13 @@
 
 import AppContext from "@/components/app-context";
 import { db } from "@/lib/firebase/config";
-import { endOfMonth, setDate, startOfMonth, isSameDay } from "date-fns";
+import {
+  endOfMonth,
+  setDate,
+  startOfMonth,
+  isSameDay,
+  isSameMonth,
+} from "date-fns";
 import {
   addDoc,
   collection,
@@ -155,7 +161,11 @@ export default function Calendars() {
             className={`
               border border-l-0 border-b-0 p-2 h-28 flex flex-col items-stretch select-none hover:bg-gray-100
               ${getDay(i + 1) == 6 ? "cursor-pointer " : ""}
-              ${new Date().getDate() == i + 1 ? "bg-red-50" : ""}
+              ${
+                isSameMonth(d, new Date()) && new Date().getDate() == i + 1
+                  ? "bg-red-50"
+                  : ""
+              }
             `}
             onClick={(ev) => {
               if (getDay(i + 1) == 6) {
