@@ -9,15 +9,14 @@ import { GiHamburgerMenu } from "react-icons/gi";
 
 import { signOut, onAuthStateChanged } from "firebase/auth";
 import { auth, db } from "../lib/firebase/config";
-import { useRouter } from 'next/navigation'
+import { useRouter } from "next/navigation";
 import { doc, getDoc } from "firebase/firestore";
-
 
 export default function LayoutClient({ children }) {
   let [showPopup, setShowPopup] = useState(false);
   let [user, setUser] = useState(undefined);
   let [userData, setUData] = useState(undefined);
-  const router = useRouter()
+  const router = useRouter();
 
   function logout() {
     signOut(auth);
@@ -26,16 +25,16 @@ export default function LayoutClient({ children }) {
   useEffect(() => {
     onAuthStateChanged(auth, async function (user) {
       if (user) {
-        setUser(user)
+        setUser(user);
         const docSnap = await getDoc(doc(db, "userData", user.uid));
-        setUData(docSnap.data())
-        router.push("/")
-      }
-      else {
+        setUData(docSnap.data());
+        router.push("/calendar");
+      } else {
         setUser(null);
+        router.push("/");
       }
-    })
-  }, [])
+    });
+  }, []);
 
   return (
     <AppContext.Provider value={{ user, userData, setUser }}>
@@ -80,9 +79,9 @@ export default function LayoutClient({ children }) {
               <Child link="/" name="Home" />
               <Child link="/about" name="About Us" />
               <Child link={"/calendar"} name="Calendar" />
-              {
-                userData.isAdmin ? <Child link={"/admin"} name="Admin" /> : undefined
-              }
+              {userData.isAdmin ? (
+                <Child link={"/admin"} name="Admin" />
+              ) : undefined}
             </div>
           ) : undefined}
         </nav>
